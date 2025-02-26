@@ -45,12 +45,13 @@ class Boid:
         self.y = y
 
         self.angleDeg = angleDeg
-        self.speed = 60
-        self.rotationSpeed = 180
-        self.viewDistance = 250
+        self.speed = 60 + random.uniform(-1, 1) * 20
+        self.rotationSpeed = 180 + random.uniform(-1, 1) * 60
+        self.viewDistance = 250 + random.uniform(-1, 1) * 50
+        self.size = 0.5 + random.uniform(0, 1)
 
     def draw(self):
-        drawOffsets = [(self.x, self.y-10), (self.x-4, self.y+2) , (self.x+4, self.y+2)]
+        drawOffsets = [(self.x, self.y - 10 * self.size), (self.x - 4 * self.size, self.y + 2 * self.size) , (self.x + 4 * self.size, self.y + 2 * self.size)]
         rotatedVerts = [
             rotatePointAroundCenter((self.x, self.y), drawOffsets[0], self.angleDeg),
             rotatePointAroundCenter((self.x, self.y), drawOffsets[1], self.angleDeg),
@@ -182,7 +183,7 @@ class Predator:
         self.viewDistance = 200
 
     def draw(self):
-        drawOffsets = [(self.x, self.y-15), (self.x-6, self.y+3) , (self.x+6, self.y+3)]
+        drawOffsets = [(self.x, self.y-20), (self.x-8, self.y+4) , (self.x+8, self.y+4)]
         rotatedVerts = [
             rotatePointAroundCenter((self.x, self.y), drawOffsets[0], self.angleDeg),
             rotatePointAroundCenter((self.x, self.y), drawOffsets[1], self.angleDeg),
@@ -221,8 +222,6 @@ class Predator:
             c_avaragePos = (c_avaragePos[0] + boid.x, c_avaragePos[1] + boid.y)
         if len(localBoids) != 0:
             c_avaragePos = (c_avaragePos[0] / len(localBoids), c_avaragePos[1] / len(localBoids))
-        else:
-            c_avaragePos = (self.x, self.y)
 
         #get vector to avarage center and rotate towards it
         c_v = (c_avaragePos[0] - self.x, c_avaragePos[1] - self.y)
@@ -237,8 +236,10 @@ class Predator:
             #turn right
             finalSteer += self.rotationSpeed
 
-    
-        self.angleDeg += finalSteer * deltaTime
+        #apply final steer, only if has target, otherwise continue moving forward instead of rotating in a circle
+        if c_avaragePos != (0, 0):
+            self.angleDeg += finalSteer * deltaTime
+
 
 seperationWeight = 0.2
 alignmentWeight = 0.4
@@ -247,7 +248,7 @@ fearWeight = 1.2
 
 #generate boids
 boids = []
-boidNum = 50
+boidNum = 10
 for i in range(boidNum):
     boid = Boid(random.uniform(0, 1) * screenWidth, random.uniform(0, 1) * screenHeight, random.uniform(0, 1) * 360)
 
